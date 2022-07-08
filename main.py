@@ -2,7 +2,7 @@ import secrets
 import argparse
 
 
-def word_to_dict(wordlist):
+def word_to_dict(wordlist):  # Convert wordlist to dictionary that can be read by passphrase function
     word_dict = {}
     with open(wordlist) as f:
         for line in f:
@@ -11,7 +11,7 @@ def word_to_dict(wordlist):
     return word_dict
 
 
-def dice_roll(rolls):
+def dice_roll(rolls):  # Roll the dice n number of times to produce number sequence
     thrown = ''
     for i in range(0, rolls):
         dice = secrets.choice(range(1, 7))
@@ -21,7 +21,7 @@ def dice_roll(rolls):
     return thrown
 
 
-def throw_list(pass_length, rolls):
+def list_of_throws(pass_length, rolls):  # Combine number sequences into a list to be read by passphrase function
     throw_list = []
     for i in range(0, pass_length):
         roll = dice_roll(rolls)
@@ -29,10 +29,11 @@ def throw_list(pass_length, rolls):
     return throw_list
 
 
-def passphrase_with_reference_nums(wordlist, rolls, pass_length):
+def passphrase_with_reference_nums(wordlist, rolls, pass_length):  # Generate passphrase based on number sequences
+    # provided
     passphrase = ''
     all_words = word_to_dict(wordlist)
-    rolls = throw_list(pass_length, rolls)
+    rolls = list_of_throws(pass_length, rolls)
     for numbers in rolls:
         word = all_words.get(numbers)
         passphrase = passphrase + word + ' '
@@ -40,35 +41,30 @@ def passphrase_with_reference_nums(wordlist, rolls, pass_length):
 
 
 def main():
+    # Set default values for generator
+    wordlist = 'eff_large_wordlist.txt'
+    pass_length = 6
+    rolls = 5
+
+    # Add parsing options for command line interface
     parser = argparse.ArgumentParser(description='Generate passphrases of your own length. Default is 6 words'
                                                  'from the "Eff large wordlist"')
-    parser.parse_args()
+    parser.add_argument('-w', '--wordlist', default='large', choices=['large', 'short'], help='Set wordlist to be used')
+    parser.add_argument('-l', '--length', default=6, type=int, help='Set length of phrase')
+    # parser.add_argument('-c', '--custom', type=str, help='Specify filepath to your own wordlist')
+    args = parser.parse_args()
+    if args.wordlist == 'large':
+        wordlist = 'eff_large_wordlist.txt'
+        rolls = 5
+    elif args.wordlist == 'short':
+        wordlist = 'eff_short_wordlist_1.txt'
+        rolls = 4
+    if args.length:
+        pass_length = args.length
 
-    # list_prompt = input('What list do you want to use?: ')
-    # if list_prompt.lower() == 'exit':
-    #     print('Okay goodbye')
-    #     quit()
-    # elif list_prompt.lower() == 'l':
-    #     wordlist = 'eff_large_wordlist.txt'
-    #     rolls = 5
-    # elif list_prompt.lower() == 's':
-    #     wordlist = 'eff_short_wordlist_1.txt'
-    #     rolls = 4
-    # elif list_prompt != 'l' or list_prompt != 's':
-    #     print('Wrong input.')
-    #     quit()
-    # try:
-    #     length_prompt = input('How long of a passphrase do you want?: ')
-    #     if length_prompt == 'exit':
-    #         quit()
-    #     pass_length = int(length_prompt)
-    # except ValueError:
-    #     print('Only numbers or "exit" are accepted')
-    #     quit()
+    generate_passphrase = passphrase_with_reference_nums(wordlist, rolls, pass_length)
+    print(generate_passphrase)
 
-
-   # generate_passphrase = passphrase_with_reference_nums(wordlist, rolls, pass_length)
-   # print(generate_passphrase)
 
 if __name__ == "__main__":
     main()
